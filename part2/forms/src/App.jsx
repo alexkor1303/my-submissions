@@ -1,14 +1,17 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
 import { Filter } from "./Components/Filter";
 import { PersonForm } from "./Components/PersonForm";
-import { Persons } from "./Components/Persons";
+import { Person } from "./Components/Person";
+import phonebookService from "./services/Phonebook";
 const App = () => {
   const [persons, setPersons] = useState([]);
   const [name, setName] = useState("");
   const [number, setNumber] = useState("");
   const [filter, setFilter] = useState("");
-
+  //getData from DB
+  useEffect(() => {
+    phonebookService.getAll().then((data) => setPersons(data));
+  }, [persons]);
   //person filter
   const personToShow = filter
     ? persons.filter((person) =>
@@ -19,21 +22,27 @@ const App = () => {
   const changeFilterValue = (event) => {
     setFilter(event.target.value);
   };
+
   //add person on list
   const addPerson = (event) => {
     event.preventDefault();
     const newPerson = {
       name: name,
       number: number,
-      id: Math.floor(Math.random() * (100 - 4) + 4),
     };
 
     if (persons.find((person) => person.name === name)) {
       return alert(`${name} is already added to phonebook`);
     }
-    setPersons(persons.concat(newPerson));
+    phonebookService.create(newPerson);
     setName("");
     setNumber("");
+  };
+  //delete person from list
+  const deletePersonFunc = (id) => {
+    if (window.confirm("delete person?")) {
+      phonebookService.remove(id);
+    }
   };
 
   const changeName = (event) => {
@@ -43,12 +52,6 @@ const App = () => {
   const changeNumber = (event) => {
     setNumber(event.target.value);
   };
-  //getData from DB
-  useEffect(() => {
-    axios.get("http://localhost:3001/persons").then((res) => {
-      setPersons(res.data);
-    });
-  }, []);
 
   return (
     <div>
@@ -65,7 +68,17 @@ const App = () => {
       />
 
       <h3>Numbers</h3>
-      <Persons personToShow={personToShow} />
+      <ul>
+        {personToShow.map((person) => {
+          return (
+            <Person
+              person={person}
+              deleteFunc={() => deletePersonFunc(person.id)}
+              key={person.id}
+            />
+          );
+        })}
+      </ul>
     </div>
   );
 };
