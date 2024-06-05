@@ -2,12 +2,15 @@ import { useState, useEffect } from "react";
 import { Filter } from "./Components/Filter";
 import { PersonForm } from "./Components/PersonForm";
 import { Person } from "./Components/Person";
+import { Notification } from "./Components/Notification";
 import phonebookService from "./services/Phonebook";
+import "./index.css";
 const App = () => {
   const [persons, setPersons] = useState([]);
   const [name, setName] = useState("");
   const [number, setNumber] = useState("");
   const [filter, setFilter] = useState("");
+  const [message, setMessage] = useState(null);
   //getData from DB
   useEffect(() => {
     phonebookService.getAll().then((data) => setPersons(data));
@@ -35,6 +38,10 @@ const App = () => {
       return alert(`${name} is already added to phonebook`);
     }
     phonebookService.create(newPerson);
+    setMessage(`user ${newPerson.name} add to phone book!`);
+    setTimeout(() => {
+      setMessage(null);
+    }, 3000);
     setName("");
     setNumber("");
   };
@@ -58,7 +65,7 @@ const App = () => {
       <h2>Phonebook</h2>
       <Filter value={filter} onChange={changeFilterValue} />
       <h3>add a new</h3>
-
+      <Notification message={message} />
       <PersonForm
         onSubmitProp={addPerson}
         nameValueProp={name}
@@ -66,7 +73,6 @@ const App = () => {
         numberValueProp={number}
         numberChangeProp={changeNumber}
       />
-
       <h3>Numbers</h3>
       <ul>
         {personToShow.map((person) => {
