@@ -4,6 +4,7 @@ const app = express();
 const morgan = require("morgan");
 app.use(cors());
 app.use(express.json());
+app.use(express.static('dist'))
 app.use(morgan("tiny"));
 
 let notes = [{ id: 1, content: "firstNote", important: true }];
